@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import date, datetime, timedelta
-from zoneinfo import ZoneiInfo
+from zoneinfo import ZoneInfo
 from supabase import create_client
 
 st.set_page_config(
