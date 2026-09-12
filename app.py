@@ -1,8 +1,8 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
 from supabase import create_client
 
 st.set_page_config(
@@ -4203,7 +4203,7 @@ with st.sidebar:
     st.caption("Oficina vinculada")
     st.success(OFICINA_PORTAL)
     st.divider()
-    st.caption("Portal da Oficina • v1.5.0 — alinhado ao Gestão 2.9.4")
+    st.caption("Portal da Oficina • v1.5.2 — alinhado ao Gestão 2.9.4")
 
 if isinstance(periodo, (tuple, list)) and len(periodo) == 2:
     inicio, fim = periodo
@@ -4249,15 +4249,25 @@ if dados.empty:
     )
     st.stop()
 
-# A visão principal de desempenho passa a usar somente os indicadores oficiais
-# de manutenção, alinhados ao Painel de Gestão v2.9.4.
-# A antiga camada de "Índice de execução / Índice de perda" foi removida
-# para evitar duas metodologias concorrentes na mesma tela.
+# Indicadores do Portal: todos os tipos de serviço.
+indicadores = calcular_indicadores_portal_todos_servicos(
+    dados
+)
+
+planejadas = indicadores["Planejadas"]
+executadas_ag = indicadores["Executadas agendadas"]
+executadas_extra = indicadores["Executadas extras"]
+executadas = indicadores["Executadas totais"]
+improdutivas = indicadores["Improdutivas"]
+improd_ag = indicadores["Improdutivas agendadas"]
+improd_extra = indicadores["Improdutivas extras"]
+no_show = indicadores["OS Perdida"]
+canceladas = indicadores["Canceladas"]
+indice_execucao = indicadores["Índice de execução"]
+indice_perda = indicadores["Índice de perda"]
 
 st.subheader(
-    f"Seu desempenho • "
-    f"{inicio.strftime('%d/%m/%Y')} a "
-    f"{fim.strftime('%d/%m/%Y')}"
+    f"Seu desempenho • {inicio.strftime('%d/%m/%Y')} a {fim.strftime('%d/%m/%Y')}"
 )
 
 # Indicadores oficiais de manutenção — mesma regra do Painel de Gestão v2.9.4.
@@ -4277,7 +4287,7 @@ except Exception as exc:
 
 if not dados_manutencao.empty:
     ind_gestao = calcular_indicadores(dados_manutencao)
-    st.markdown("### 🎯 Meu desempenho — manutenção")
+    st.markdown("### 🎯 Indicadores de manutenção")
     g1, g2, g3, g4, g5 = st.columns(5)
     g1.metric("Planejadas", ind_gestao["Planejadas"])
     g2.metric("Executadas", ind_gestao["Executadas planejadas"] + ind_gestao["Executadas extras"])
