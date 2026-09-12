@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
 from supabase import create_client
 
 st.set_page_config(
@@ -4249,56 +4248,15 @@ if dados.empty:
     )
     st.stop()
 
-# Indicadores do Portal: todos os tipos de serviço.
-indicadores = calcular_indicadores_portal_todos_servicos(
-    dados
-)
-
-planejadas = indicadores["Planejadas"]
-executadas_ag = indicadores["Executadas agendadas"]
-executadas_extra = indicadores["Executadas extras"]
-executadas = indicadores["Executadas totais"]
-improdutivas = indicadores["Improdutivas"]
-improd_ag = indicadores["Improdutivas agendadas"]
-improd_extra = indicadores["Improdutivas extras"]
-no_show = indicadores["OS Perdida"]
-canceladas = indicadores["Canceladas"]
-indice_execucao = indicadores["Índice de execução"]
-indice_perda = indicadores["Índice de perda"]
+# A visão principal de desempenho passa a usar somente os indicadores oficiais
+# de manutenção, alinhados ao Painel de Gestão v2.9.4.
+# A antiga camada de "Índice de execução / Índice de perda" foi removida
+# para evitar duas metodologias concorrentes na mesma tela.
 
 st.subheader(
     f"Seu desempenho • "
     f"{inicio.strftime('%d/%m/%Y')} a "
     f"{fim.strftime('%d/%m/%Y')}"
-)
-
-st.markdown(
-    f"### {indicadores['Símbolo']} "
-    f"Termômetro operacional: **{indicadores['Nível']}**"
-)
-st.caption(
-    indicadores["Mensagem"]
-)
-
-c1, c2, c3, c4 = st.columns(4)
-
-exibir_card_portal(c1, "Serviços planejados", planejadas, "Planejados")
-exibir_card_portal(c2, "Executados", executadas, "Executados")
-exibir_card_portal(c3, "Não concluídos", improdutivas, "Não concluídos")
-exibir_card_portal(c4, "OS Perdida", no_show, "OS Perdida")
-
-c5, c6, c7, c8 = st.columns(4)
-
-exibir_card_portal(c5, "Cancelados", canceladas, "Cancelados")
-exibir_card_portal(c6, "Execuções extras", executadas_extra, "Execuções extras")
-exibir_card_portal(c7, "Índice de execução", f"{indice_execucao:.1f}%")
-exibir_card_portal(c8, "Índice de perda", f"{indice_perda:.1f}%")
-
-st.caption(
-    "Índice de execução = executados do planejamento ÷ "
-    "(planejados − cancelados). "
-    "Índice de perda = improdutivas agendadas + OS Perdida ÷ "
-    "(planejados − cancelados)."
 )
 
 # Indicadores oficiais de manutenção — mesma regra do Painel de Gestão v2.9.4.
@@ -4318,7 +4276,7 @@ except Exception as exc:
 
 if not dados_manutencao.empty:
     ind_gestao = calcular_indicadores(dados_manutencao)
-    st.markdown("### 🎯 Indicadores de manutenção — regra Gestão 2.9.4")
+    st.markdown("### 🎯 Meu desempenho — manutenção")
     g1, g2, g3, g4, g5 = st.columns(5)
     g1.metric("Planejadas", ind_gestao["Planejadas"])
     g2.metric("Executadas", ind_gestao["Executadas planejadas"] + ind_gestao["Executadas extras"])
